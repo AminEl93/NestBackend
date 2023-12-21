@@ -4,6 +4,7 @@
 
 # MongoDB
 mongo/
+.env
 
 # Logs
 logs
