@@ -2,6 +2,8 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
+import * as bcryptjs from 'bcryptjs';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 
@@ -15,22 +17,27 @@ export class AuthService {
         @InjectModel(User.name) private _userModel: Model<User>
     ) { }    
 
-    async create(createUserDto: CreateUserDto): Promise<User> {
-        
-        try { 
-            const newUser = new this._userModel(createUserDto);            
-            // Paso 1 : Encriptar la contraseña
+    async create(createUserDto: CreateUserDto): Promise<User> {        
+        try {            
+            const { password, ...userData } = createUserDto;
 
-            // Paso 2 : Guardar el usuario
+            // Encriptar la contraseña
+            const newUser = new this._userModel({
+                password: bcryptjs.hashSync(password, 10),
+                ...userData
+            });            
 
-            // Paso 3 : Generar el JWT (JSON Web Token) que será la llave de acceso
+            // Guardar el usuario
+            await newUser.save();
 
-            return await newUser.save();
-        } catch (error) {
+            const { password:_, ...user } = newUser.toJSON();
+            return user;
+        }
+        catch (error) {
             if (error.code === 11000) {
-                throw new BadRequestException(`${createUserDto.email} ya existe!`)
+                throw new BadRequestException(`${createUserDto.email} ya existe en la base de datos!`);
             }
-            throw new InternalServerErrorException('Algo no ha ido bien! :(');
+            throw new InternalServerErrorException('Algo no ha ido bien, los datos contienen errores! :(');
         }
     }
 
