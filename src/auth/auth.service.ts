@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    InternalServerErrorException,
+    UnauthorizedException
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -6,9 +11,9 @@ import * as bcryptjs from 'bcryptjs';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { LoginDto } from './dto/login.dto';
 
 import { User } from './entities/user.entity';
-
 
 @Injectable()
 export class AuthService {
@@ -17,6 +22,7 @@ export class AuthService {
         @InjectModel(User.name) private _userModel: Model<User>
     ) { }    
 
+    // Crear un registro en la base de datos
     async create(createUserDto: CreateUserDto): Promise<User> {        
         try {            
             const { password, ...userData } = createUserDto;
@@ -38,6 +44,22 @@ export class AuthService {
                 throw new BadRequestException(`${createUserDto.email} ya existe en la base de datos!`);
             }
             throw new InternalServerErrorException('Algo no ha ido bien, los datos contienen errores! :(');
+        }
+    }
+
+    // Login del usuario --> Regresa el User (_id, name, email...) y el JWT
+    async login(loginDto: LoginDto) {
+        const { email, password } = loginDto;
+        const user = await this._userModel.findOne({ email });
+        if (!user) {
+            throw new UnauthorizedException('Credenciales no válidas para este email');
+        }      
+        if (!bcryptjs.compareSync(password, user.password)) {
+            throw new UnauthorizedException('Credenciales no válidas para este password');
+        }      
+        const { password:_, ...restData } = user.toJSON();
+        return {
+            user: restData
         }
     }
 
