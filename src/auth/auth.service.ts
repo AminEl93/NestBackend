@@ -59,7 +59,7 @@ export class AuthService {
         }
     }
 
-    // Login del usuario --> Regresa el User (_id, name, email...) y el JWT
+    // Login de un usuario --> Regresa el User (_id, name, email...) y el JWT
     async login(loginDto: LoginDto): Promise<LoginResponse>  {
         const { email, password } = loginDto;
         const user = await this._userModel.findOne({ email });
@@ -76,8 +76,16 @@ export class AuthService {
         }
     }
 
-    findAll() {
-        return `This action returns all auth`;
+    // Obtener todos los usuarios
+    findAll(): Promise<User[]> {
+        return this._userModel.find();
+    }
+
+    // Obtener un usuario por su ID
+    async findUserById(userId: string) {
+        const user = await this._userModel.findById(userId);
+        const { password, ...restData } = user.toJSON();
+        return restData;
     }
 
     findOne(id: number) {
