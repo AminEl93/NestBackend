@@ -10,7 +10,7 @@ import { Model } from 'mongoose';
 
 import * as bcryptjs from 'bcryptjs';
 
-import { CreateUserDto, RegisterUserDto, LoginDto, UpdateAuthDto } from './dto';
+import { CreateUserDto, RegisterUserDto, LoginDto } from './dto';
 
 import { User } from './entities/user.entity';
 
@@ -86,18 +86,6 @@ export class AuthService {
         const user = await this._userModel.findById(userId);
         const { password, ...restData } = user.toJSON();
         return restData;
-    }
-
-    findOne(id: number) {
-        return `This action returns a #${id} auth`;
-    }
-
-    update(id: number, updateAuthDto: UpdateAuthDto) {
-        return `This action updates a #${id} auth`;
-    }
-
-    remove(id: number) {
-        return `This action removes a #${id} auth`;
     }
 
     // Generar el JWT (JSON Web Token) que será la llave de acceso

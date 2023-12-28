@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
-import { CreateUserDto, RegisterUserDto, LoginDto, UpdateAuthDto } from './dto';
+import { CreateUserDto, RegisterUserDto, LoginDto } from './dto';
 import { AuthGuard } from './guards/auth.guard';
-
+import { LoginResponse } from './interfaces/login-response';
+import { User } from './entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -30,18 +31,14 @@ export class AuthController {
         return this._authService.findAll();
     }
 
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this._authService.findOne(+id);
-    }
-
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-        return this._authService.update(+id, updateAuthDto);
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this._authService.remove(+id);
+    // Generar un nuevo JWT y verificarlo
+    @UseGuards(AuthGuard)
+    @Get('check-token')
+    checkToken(@Request() req: Request): LoginResponse {
+        const user = req['user'] as User;
+        return {
+            user,
+            token: this._authService.getJwtToken({ id: user._id })
+        }
     }
 }
