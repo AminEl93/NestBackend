@@ -5,6 +5,7 @@ import {
     UnauthorizedException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
 
 import * as bcryptjs from 'bcryptjs';
@@ -15,11 +16,14 @@ import { LoginDto } from './dto/login.dto';
 
 import { User } from './entities/user.entity';
 
+import { JwtPayload } from './interfaces/jwt-payload';
+
 @Injectable()
 export class AuthService {
 
     constructor(
-        @InjectModel(User.name) private _userModel: Model<User>
+        @InjectModel(User.name) private _userModel: Model<User>,
+        private _jwtService: JwtService
     ) { }    
 
     // Crear un registro en la base de datos
@@ -59,7 +63,8 @@ export class AuthService {
         }      
         const { password:_, ...restData } = user.toJSON();
         return {
-            user: restData
+            user: restData,
+            token: this.getJwtToken({ id: user.id })
         }
     }
 
@@ -77,5 +82,11 @@ export class AuthService {
 
     remove(id: number) {
         return `This action removes a #${id} auth`;
+    }
+
+    // Generar el JWT (JSON Web Token) que será la llave de acceso
+    getJwtToken(payload: JwtPayload) {
+        const token = this._jwtService.sign(payload);
+        return token;
     }
 }
