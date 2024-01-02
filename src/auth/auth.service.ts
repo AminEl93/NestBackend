@@ -67,7 +67,7 @@ export class AuthService {
             throw new UnauthorizedException('Email no válido! Por favor, prueba otro');
         }      
         if (!bcryptjs.compareSync(password, user.password)) {
-            throw new UnauthorizedException('Contraseña no válida! Por favor, prueba otro');
+            throw new UnauthorizedException('Contraseña no válida! Por favor, prueba otra');
         }      
         const { password:_, ...restData } = user.toJSON();
         return {
