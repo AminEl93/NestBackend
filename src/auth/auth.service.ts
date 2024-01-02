@@ -64,10 +64,10 @@ export class AuthService {
         const { email, password } = loginDto;
         const user = await this._userModel.findOne({ email });
         if (!user) {
-            throw new UnauthorizedException('Este email no existe en la base de datos, prueba otro válido!');
+            throw new UnauthorizedException('Email no válido! Por favor, prueba otro');
         }      
         if (!bcryptjs.compareSync(password, user.password)) {
-            throw new UnauthorizedException('Esta contraseña no existe en la base de datos, prueba otra válida!');
+            throw new UnauthorizedException('Contraseña no válida! Por favor, prueba otro');
         }      
         const { password:_, ...restData } = user.toJSON();
         return {
