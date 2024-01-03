@@ -44,7 +44,7 @@ export class AuthService {
         }
         catch (error) {
             if (error.code === 11000) {
-                throw new BadRequestException(`${createUserDto.email} ya existe en la base de datos!`);
+                throw new BadRequestException(`${createUserDto.email} ya existe! Por favor, prueba otro`);
             }
             throw new InternalServerErrorException('Algo no ha ido bien, los datos contienen errores! :(');
         }
